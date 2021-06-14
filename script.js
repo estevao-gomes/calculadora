@@ -1,26 +1,33 @@
 class Calculadora{
 	constructor(){
-		this.list_of_actions = ['+', '-', '*', '/', '=', 'c', 'Enter']
+		this.list_of_ops = ['+', '-', '*', '/']
+		this.list_of_actions = ['=', 'c', 'Enter', 'Backspace', '.']
 		this.saida_inferior=''
 		this.saida_superior=''
 		this.ultima_operacao=''
 		this.exib = document.getElementById('resultado')
 	}
 	//função para execução dos cálculos
+	operacao(operacao){
+		if(this.ultima_operacao == ''){ //check se havia alguma operação inserida na linha superior para execução
+			this.saida_superior = this.saida_inferior // leva a parte inferior para a superior
+		}else{
+			this.saida_superior = this.calcular() //calcula a operação na memória
+		}
+		this.ultima_operacao = operacao 
+		this.saida_inferior=''
+		this.exibir()
+		
+	}
 	acao(action){
-		if(action != '=' && action != 'c' && action != 'Enter'){ 
-			if(this.ultima_operacao == ''){ //check se havia alguma operação inserida na linha superior para execução
-				this.saida_superior = this.saida_inferior // leva a parte inferior para a superior
-			}else{
-				this.saida_superior = this.calcular() //calcula a operação na memória
-			}
-			this.ultima_operacao = action 
-			this.saida_inferior=''
-			this.exibir()
-		}else if(action =='=' || action =='Enter'){
+		if(action =='=' || action =='Enter'){
 			this.exibirResultado()
 		}else if(action =='c'){
 			this.clear()
+		}else if (action == 'Backspace'){
+			this.back()
+		}else if(action == '.' && !this.saida_inferior.includes('.')){
+			this.numero('.')
 		}
 	}
 	numero(num){ //adiciona numeros a serem exibidos
@@ -45,13 +52,24 @@ class Calculadora{
 	}
 	calcular(){//calcula os valores na memória e em exibição
 		resultado = eval(this.saida_superior + this.ultima_operacao + this.saida_inferior)
-		return resultado
+		return resultado.toString(10)
 	}
 	clear(){ //limpa a tela e a memória
 		this.saida_inferior = ''
 		this.saida_superior = ''
 		this.ultima_operacao = ''
 		this.exib.value = ""
+	}
+	back(){
+		if(this.saida_inferior != ''){
+			this.saida_inferior = this.saida_inferior.slice(0, -1)
+			this.exibir()
+		}else{
+			this.ultima_operacao=''
+			this.saida_inferior = this.saida_superior
+			this.saida_superior = ''
+			this.exibir()
+		}
 	}
 
 }
@@ -69,10 +87,10 @@ document.addEventListener("keydown", (event)=>{
 	console.log(key)
 	if(isNaN(parseFloat(key))){
 		if(calc.list_of_actions.includes(key)){
-				calc.acao(key)
-			}else if(key == '.'){
-				calc.numero(key)
-			}
+			calc.acao(key)
+		}else if(calc.list_of_ops.includes(key)){
+			calc.operacao(key)
+		}
 	}else{
 		let number = parseFloat(key)
 		console.log('entrei aqui')
